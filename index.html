@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>P$RN Link Sender</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #2c2c34;
+            color: #e4e6eb;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            background-color: #3e3e49;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            text-align: center;
+            color: #ff6b81;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ff4757;
+            font-weight: bold;
+        }
+
+        .input-group input, .input-group select {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 10px;
+            border: 2px solid #4e4e57;
+            border-radius: 8px;
+            background-color: #2c2c34;
+            color: #e4e6eb;
+            font-size: 16px;
+        }
+
+        .links-container {
+            margin-bottom: 20px;
+        }
+
+        .link-entry {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background-color: #4e4e57;
+            border-radius: 8px;
+        }
+
+        .link-entry input, .link-entry select {
+            width: 32%;
+            margin-right: 10px;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            background-color: #2c2c34;
+            color: #e4e6eb;
+        }
+
+        .link-entry input[type="number"] {
+            width: 20%;
+            margin-left: 10px;
+        }
+
+        .add-btn, .send-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s, transform 0.3s;
+        }
+
+        .add-btn {
+            background-color: #1e90ff;
+            color: #ffffff;
+            margin-bottom: 20px;
+        }
+
+        .send-btn {
+            background-color: #ff4757;
+            color: #ffffff;
+        }
+
+        .add-btn:hover, .send-btn:hover {
+            background-color: #007bff;
+            transform: scale(1.02);
+        }
+
+        .send-btn:hover {
+            background-color: #e04f5f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>P$RN Link Sender</h1>
+
+        <!-- Select name -->
+        <div class="input-group">
+            <label for="name">Who are you?</label>
+            <select id="name">
+                <option value="peer">Peer</option>
+                <option value="liam">Liam</option>
+            </select>
+        </div>
+
+        <!-- Links section -->
+        <div class="links-container" id="links-container">
+            <!-- Dynamically added sections will appear here -->
+        </div>
+
+        <button class="add-btn" id="add-link-btn">Add another link</button>
+        
+        <button class="send-btn" id="send-btn">Send to Discord</button>
+    </div>
+
+    <script>
+        const linksContainer = document.getElementById('links-container');
+        const addLinkBtn = document.getElementById('add-link-btn');
+        const sendBtn = document.getElementById('send-btn');
+
+        // Function to add a new link section
+        addLinkBtn.addEventListener('click', () => {
+            const linkEntry = document.createElement('div');
+            linkEntry.classList.add('link-entry');
+            linkEntry.innerHTML = `
+                <input type="text" class="link-input" placeholder="Enter link" required>
+                <select class="category-select">
+                    <option value="IRL Porn">IRL Porn</option>
+                    <option value="Hentai">Hentai</option>
+                    <option value="Other">Other</option>
+                </select>
+                <input type="number" class="rating-input" min="1" max="5" placeholder="Rating (1-5)" required>
+            `;
+            linksContainer.appendChild(linkEntry);
+        });
+
+        // Gather data and send to the correct webhook
+        sendBtn.addEventListener('click', () => {
+            const name = document.getElementById('name').value;
+            const links = document.querySelectorAll('.link-entry');
+
+            let embeds = [];
+
+            // Loop through each link entry
+            links.forEach((linkEntry, index) => {
+                const linkInput = linkEntry.querySelector('.link-input').value;
+                const categorySelect = linkEntry.querySelector('.category-select').value;
+                const ratingInput = linkEntry.querySelector('.rating-input').value;
+
+                // Push each link into the embeds array
+                embeds.push({
+                    title: `Link ${index + 1}: ${categorySelect}`,
+                    description: `**Link:** [Click here](${linkInput})\n**Rating:** ${ratingInput} stars`,
+                    color: 0xff4757,
+                    footer: {
+                        text: 'P$RN Link Sender'
+                    }
+                });
+            });
+
+            // Choose the correct webhook URL based on the name selected
+            const webhookURL = name === 'peer'
+                ? 'https://discord.com/api/webhooks/1284947029768015912/62jVKU1iQ5xPe2Edf7hNXMx-UQouCOMnrE5Tk2AnfdVw1IZXKLhUoFIfTDvMNIv2Adeg'
+                : 'https://discord.com/api/webhooks/1284947245070024854/3RQi6kzQeyNThsH72l5Qm2_KHv-T4fXvpAQIuT8YsdQGhETx-8gXWM8eDoHaSknKo4-I';
+
+            // Send data to Discord Webhook
+            fetch(webhookURL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    username: name === 'peer' ? 'Peer' : 'Liam',
+                    embeds: embeds
+                })
+            }).then(response => {
+                if (response.ok) {
+                    alert('Links successfully sent to Discord!');
+                } else {
+                    alert('Error sending data.');
+                }
+            }).catch(error => {
+                console.error('Error:', error);
+                alert('There was a problem sending the data.');
+            });
+        });
+    </script>
+</body>
+</html>
